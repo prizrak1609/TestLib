@@ -29,8 +29,80 @@ class LayoutLibUITests: XCTestCase {
     }
     
     func testExample() {
-        // Use recording to get started writing UI tests.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(true)
     }
-    
+
+    func testAddFirst() {
+        let app = XCUIApplication()
+        app.buttons["Add last"].tap()
+        let addFirstButton = app.buttons["Add first"]
+        for _ in 0...50 {
+            addFirstButton.tap()
+        }
+    }
+
+    func testAddLast() {
+        let addLastButton = XCUIApplication().buttons["Add last"]
+        for _ in 0...50 {
+            addLastButton.tap()
+        }
+    }
+
+    func testAddRandom() {
+        let app = XCUIApplication()
+        app.buttons["Add last"].tap()
+        let addRandomButton = app.buttons["Add random"]
+        for _ in 0...50 {
+            addRandomButton.tap()
+        }
+    }
+
+    func testRemoveFirst() {
+        let app = XCUIApplication()
+        app.buttons["Add last"].tap()
+        let addFirstButton = app.buttons["Add first"]
+        for _ in 0...50 {
+            addFirstButton.tap()
+        }
+        let removeFirstButton = app.buttons["Remove first"]
+        for _ in 0...50 {
+            removeFirstButton.tap()
+        }
+    }
+
+    func testRemoveLast() {
+        let app = XCUIApplication()
+        app.buttons["Add last"].tap()
+        let addFirstButton = app.buttons["Add first"]
+        for _ in 0...50 {
+            addFirstButton.tap()
+        }
+        let removeLastButton = app.buttons["Remove last"]
+        for _ in 0...50 {
+            removeLastButton.tap()
+        }
+    }
+
+    func testRemoveRandom() {
+        let app = XCUIApplication()
+        app.buttons["Add last"].tap()
+        let addFirstButton = app.buttons["Add first"]
+        for _ in 0...50 {
+            addFirstButton.tap()
+        }
+        let removeRandomButton = app.buttons["Remove random"]
+        for _ in 0...50 {
+            removeRandomButton.tap()
+        }
+    }
+
+    func testRemoveAll() {
+        let app = XCUIApplication()
+        app.buttons["Add last"].tap()
+        let addFirstButton = app.buttons["Add first"]
+        for _ in 0...50 {
+            addFirstButton.tap()
+        }
+        app.buttons["Remove all"].tap()
+    }
 }
