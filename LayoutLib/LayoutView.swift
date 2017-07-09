@@ -50,18 +50,22 @@ public protocol LayoutViewDelegate : class {
     optional func LVDdidLayout(view: UIView, in layoutView: LayoutView)
 }
 
+public protocol LayoutViewDelegateInfo : class {
+    func LVDupdate(info: LayoutView.Info, in layoutView: LayoutView)
+}
+
 open class LayoutView: UIView {
 
     public struct Info {
         public var nextX: CGFloat = 0
         public var nextY: CGFloat = 0
-        public var estimatedHeight: CGFloat = 0
+        public var estimatedSize = CGSize.zero
     }
 
-    open private(set) var views = [UIView]()
-    open private(set) var info = Info(nextX: 0, nextY: 0, estimatedHeight: 0)
+    open private(set) var views = ContiguousArray<UIView>()
+    open private(set) var info = Info(nextX: 0, nextY: 0, estimatedSize: .zero)
 
-    open weak var delegate: LayoutViewDelegate?
+    open weak var delegate: (LayoutViewDelegate & LayoutViewDelegateInfo)?
 
     open var viewInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 
@@ -110,15 +114,20 @@ open class LayoutView: UIView {
         info.nextX = 0
         info.nextY = viewInset.top
         for view in views {
+            let currentEstimatedHeight = info.nextY + view.frame.height + viewInset.bottom
+            if currentEstimatedHeight > info.estimatedSize.height {
+                info.estimatedSize.height = currentEstimatedHeight
+            }
+            let currentEstimatedWidth = info.nextX + viewInset.left + view.frame.width + viewInset.right
+            if currentEstimatedWidth > info.estimatedSize.width {
+                info.estimatedSize.width = currentEstimatedWidth
+            }
+            delegate?.LVDupdate(info: info, in: self)
             guard info.nextY < self.bounds.height else {
                 view.isHidden = true
                 continue
             }
             view.isHidden = false
-            let currentEstimatedHeight = info.nextY + view.frame.height + viewInset.bottom
-            if currentEstimatedHeight > info.estimatedHeight {
-                info.estimatedHeight = currentEstimatedHeight
-            }
             delegate?.LVDwillLayout?(view: view, in: self)
             info.nextX += viewInset.left
             if view.frame.width > self.bounds.width || info.nextX + view.frame.width > self.bounds.width {

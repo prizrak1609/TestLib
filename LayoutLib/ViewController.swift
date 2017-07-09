@@ -15,6 +15,8 @@ final class ViewController: UIViewController {
             containerView.delegate = self
         }
     }
+    @IBOutlet fileprivate weak var containerHeight: NSLayoutConstraint!
+    @IBOutlet fileprivate weak var containerWidth: NSLayoutConstraint!
 
     fileprivate var viewNumber = 0
 
@@ -68,7 +70,7 @@ final class ViewController: UIViewController {
     }
 }
 
-extension ViewController : LayoutViewDelegate {
+extension ViewController : LayoutViewDelegate, LayoutViewDelegateInfo {
 
     func LVDwillAdd(subview: UIView, in layoutView: LayoutView) {
         print(#function, subview, "in", layoutView)
@@ -120,5 +122,11 @@ extension ViewController : LayoutViewDelegate {
 
     func LVDdidLayout(view: UIView, in layoutView: LayoutView) {
         print(#function, view, "in", layoutView)
+    }
+
+    func LVDupdate(info: LayoutView.Info, in layoutView: LayoutView) {
+        print(#function, info)
+        containerWidth.constant = info.estimatedSize.width
+        containerHeight.constant = info.estimatedSize.height
     }
 }
