@@ -52,11 +52,14 @@ public protocol LayoutViewDelegate : class {
 
 open class LayoutView: UIView {
 
-    open private(set) var views = [UIView]()
-    public struct Global {
-        public fileprivate(set) static var x: CGFloat = 0
-        public fileprivate(set) static var y: CGFloat = 0
+    public struct Info {
+        public var nextX: CGFloat = 0
+        public var nextY: CGFloat = 0
+        public var estimatedHeight: CGFloat = 0
     }
+
+    open private(set) var views = [UIView]()
+    open private(set) var info = Info(nextX: 0, nextY: 0, estimatedHeight: 0)
 
     open weak var delegate: LayoutViewDelegate?
 
@@ -104,30 +107,34 @@ open class LayoutView: UIView {
     override open func layoutSubviews() {
         guard !views.isEmpty else { return }
         delegate?.LVDwillLayoutSubviews?()
-        Global.x = 0
-        Global.y = viewInset.top
+        info.nextX = 0
+        info.nextY = viewInset.top
         for view in views {
-            guard Global.y < self.bounds.height else {
+            guard info.nextY < self.bounds.height else {
                 view.isHidden = true
                 continue
             }
             view.isHidden = false
+            let currentEstimatedHeight = info.nextY + view.frame.height + viewInset.bottom
+            if currentEstimatedHeight > info.estimatedHeight {
+                info.estimatedHeight = currentEstimatedHeight
+            }
             delegate?.LVDwillLayout?(view: view, in: self)
-            Global.x += viewInset.left
-            if view.frame.width > self.bounds.width || Global.x + view.frame.width > self.bounds.width {
+            info.nextX += viewInset.left
+            if view.frame.width > self.bounds.width || info.nextX + view.frame.width > self.bounds.width {
                 delegate?.LVDerrorWhenLayout?(.viewNotFullVisibleHorisontal, view: view, in: self)
             }
-            if view.frame.height > self.bounds.height || Global.y + view.frame.height > self.bounds.height {
+            if view.frame.height > self.bounds.height || info.nextY + view.frame.height > self.bounds.height {
                 delegate?.LVDerrorWhenLayout?(.viewNotFullVisibleVertical, view: view, in: self)
             }
-            view.frame.origin = CGPoint(x: Global.x, y: Global.y)
-            Global.x += view.frame.width + viewInset.right
-            if Global.x > self.bounds.width {
-                Global.x = 0
-                Global.y += view.frame.height + viewInset.bottom + viewInset.top
+            view.frame.origin = CGPoint(x: info.nextX, y: info.nextY)
+            info.nextX += view.frame.width + viewInset.right
+            if info.nextX > self.bounds.width {
+                info.nextX = 0
+                info.nextY += view.frame.height + viewInset.bottom + viewInset.top
             }
             delegate?.LVDdidLayout?(view: view, in: self)
-            if Global.y > self.bounds.height {
+            if info.nextY > self.bounds.height {
                 delegate?.LVDerrorWhenLayout?(.noEmptyVerticalSpace, view: view, in: self)
             }
         }
